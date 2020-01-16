@@ -1,6 +1,6 @@
 FROM alpine:3.10
 
-ENV KUBECTL_VERSION="v1.15.2"
+ENV KUBECTL_VERSION="v1.17.0"
 
 RUN apk update \
     && apk add curl ca-certificates --no-cache
