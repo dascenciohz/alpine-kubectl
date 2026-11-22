@@ -1,10 +1,9 @@
-FROM alpine:3.10
+FROM alpine:latest
 
-ENV KUBECTL_VERSION="v1.17.0"
+RUN apk add --no-cache curl ca-certificates
 
-RUN apk update \
-    && apk add curl ca-certificates --no-cache
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+    && chmod +x kubectl \
+    && mv kubectl /usr/local/bin/
 
-ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
-
-RUN chmod +x /usr/local/bin/kubectl
+CMD ["kubectl", "version", "--client"]
