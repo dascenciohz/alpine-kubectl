@@ -1,0 +1,36 @@
+name: container-scan
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"   # escaneo semanal: aparecen CVEs nuevos aunque no cambie el código
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t app:${{ github.sha }} .
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@38b337fff0a2f984d5be173c99e3f633438167ec   # fija a un commit, no a un tag
+        with:
+          image-ref: app:${{ github.sha }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true      # solo lo que tiene versión corregida
+
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-container
